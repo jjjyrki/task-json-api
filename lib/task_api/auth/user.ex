@@ -3,6 +3,7 @@ defmodule TaskApi.Auth.User do
   import Ecto.Changeset
 
   schema "users" do
+    field :name, :string
     field :email, :string
     field :password, :string, virtual: true
     field :password_hash, :string
@@ -12,8 +13,8 @@ defmodule TaskApi.Auth.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:email, :password])
-    |> validate_required([:email])
+    |> cast(attrs, [:email, :password, :name])
+    |> validate_required([:email, :password, :name])
     |> unique_constraint(:email)
     |> put_password_hash()
   end
