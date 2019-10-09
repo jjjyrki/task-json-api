@@ -42,8 +42,7 @@ defmodule TaskApiWeb.UserControllerTest do
       assert %{
                "id" => id,
                "email" => "some email",
-               "name" => "some name",
-               "password" => "some password"
+               "name" => "some name"
              } = json_response(conn, 200)["data"]
     end
 
@@ -65,8 +64,7 @@ defmodule TaskApiWeb.UserControllerTest do
       assert %{
                "id" => id,
                "email" => "some updated email",
-               "name" => "some updated name",
-               "password" => "some updated password"
+               "name" => "some updated name"
              } = json_response(conn, 200)["data"]
     end
 
