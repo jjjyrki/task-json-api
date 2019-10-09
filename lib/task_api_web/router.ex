@@ -3,6 +3,7 @@ defmodule TaskApiWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :fetch_session
   end
 
   scope "/api", TaskApiWeb do
