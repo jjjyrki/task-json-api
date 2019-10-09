@@ -11,8 +11,11 @@ config :logger, level: :warn
 
 # Configure your database
 config :task_api, TaskApi.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "elixir_dev",
+  password: "password",
   database: "task_api_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :bcrypt_elixir, :log_rounds, 4
+
