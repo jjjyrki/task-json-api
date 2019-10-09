@@ -11,8 +11,22 @@ defmodule TaskApiWeb.UserView do
   end
 
   def render("user.json", %{user: user}) do
-    %{id: user.id,
+    %{
+      id: user.id,
       email: user.email,
-      name: user.name}
+      name: user.name
+    }
+  end
+
+  def render("sign_in.json", %{user: user}) do
+    %{
+      data: %{
+        user: %{
+          id: user.id,
+          email: user.email,
+          name: user.name
+        }
+      }
+    }
   end
 end
