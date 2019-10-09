@@ -6,9 +6,23 @@ defmodule TaskApi.AuthTest do
   describe "users" do
     alias TaskApi.Auth.User
 
-    @valid_attrs %{email: "some email"}
-    @update_attrs %{email: "some updated email"}
-    @invalid_attrs %{email: nil}
+    @valid_attrs %{
+      email: "some email",
+      password: "some password",
+      name: "some name"
+    }
+
+    @update_attrs %{
+      email: "some updated email",
+      password: "some updated password",
+      name: "some updated name"
+    }
+
+    @invalid_attrs %{
+      email: nil,
+      password: nil,
+      name: nil
+    }
 
     def user_fixture(attrs \\ %{}) do
       {:ok, user} =
@@ -17,6 +31,7 @@ defmodule TaskApi.AuthTest do
         |> Auth.create_user()
 
       user
+      %{user | password: nil}
     end
 
     test "list_users/0 returns all users" do
@@ -31,7 +46,9 @@ defmodule TaskApi.AuthTest do
 
     test "create_user/1 with valid data creates a user" do
       assert {:ok, %User{} = user} = Auth.create_user(@valid_attrs)
+      assert user.name == "some name"
       assert user.email == "some email"
+      assert Bcrypt.verify_pass("some password", user.password_hash)
     end
 
     test "create_user/1 with invalid data returns error changeset" do
@@ -41,7 +58,9 @@ defmodule TaskApi.AuthTest do
     test "update_user/2 with valid data updates the user" do
       user = user_fixture()
       assert {:ok, %User{} = user} = Auth.update_user(user, @update_attrs)
+      assert user.name == "some updated name"
       assert user.email == "some updated email"
+      assert Bcrypt.verify_pass("some updated password", user.password_hash)
     end
 
     test "update_user/2 with invalid data returns error changeset" do
