@@ -1,12 +1,46 @@
-defmodule TaskApi.Auth do
+defmodule TaskApi.Accounts do
   @moduledoc """
-  The Auth context.
+  The Accounts context.
   """
 
   import Ecto.Query, warn: false
+  
   alias TaskApi.Repo
+  alias TaskApi.Accounts.User
 
-  alias TaskApi.Auth.User
+  import Comeonin.Bcrypt, only: [checkpw: 2, dummy_checkpw: 0]
+
+  def token_sign_in(email, password) do
+    case email_password_auth(email, password) do
+      {:ok, user} ->
+        Guardian.encode_and_sign(user, :access)
+      _ ->
+        {:error, :unauthorized}
+    end
+  end
+
+  defp get_by_email(email) when is_binary(email) do
+    case Repo.get_by(User, email: email) do
+      nil ->
+        dummy_checkpw()
+        {:error, "Login error."}
+      user ->
+        {:ok, user}
+    end
+  end
+  
+  defp verify_password(password, %User{} = user) when is_binary(password) do
+    if checkpw(password, user.password_hash) do
+      {:ok, user}
+    else
+      {:error, :invalid_password}
+    end
+  end
+
+  defp email_password_auth(email, password) when is_binary(email) and is_binary(password) do
+    with {:ok, user} <- get_by_email(email),
+    do: verify_password(password, user)
+  end
 
   @doc """
   Returns the list of users.
@@ -101,24 +135,4 @@ defmodule TaskApi.Auth do
   def change_user(%User{} = user) do
     User.changeset(user, %{})
   end
-
-  def authenticate_user(email, password) do
-    query = from(u in User, where: u.email == ^email)
-    query |> Repo.one() |> verify_password(password)
-  end
-
-  defp verify_password(nil, _) do
-    # Perform a dummy check to make user enumeration more difficult
-    Bcrypt.no_user_verify()
-    {:error, "Wrong email or password"}
-  end
-
-  defp verify_password(user, password) do
-    if Bcrypt.verify_pass(password, user.password_hash) do
-      {:ok, user}
-    else
-      {:error, "Wrong email or password"}
-    end
-  end
-
 end

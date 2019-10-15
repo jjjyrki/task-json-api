@@ -13,6 +13,13 @@ defmodule TaskApiWeb.FallbackController do
     |> render(:"404")
   end
 
+  def call(conn, {:error, :unauthorized}) do
+    conn
+    |> put_status(:unauthorized)
+    |> put_view(TaskApiWeb.ErrorView)
+    |> json(%{error: "Login error"})
+  end
+
   def call(conn, {:error, %Ecto.Changeset{}}) do
     conn
     |> put_status(:unprocessable_entity)

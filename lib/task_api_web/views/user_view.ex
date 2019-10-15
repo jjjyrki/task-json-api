@@ -2,6 +2,10 @@ defmodule TaskApiWeb.UserView do
   use TaskApiWeb, :view
   alias TaskApiWeb.UserView
 
+  def render("jwt.json", %{jwt: jwt}) do
+    %{jwt: jwt}
+  end
+
   def render("index.json", %{users: users}) do
     %{data: render_many(users, UserView, "user.json")}
   end
@@ -11,22 +15,6 @@ defmodule TaskApiWeb.UserView do
   end
 
   def render("user.json", %{user: user}) do
-    %{
-      id: user.id,
-      email: user.email,
-      name: user.name
-    }
-  end
-
-  def render("sign_in.json", %{user: user}) do
-    %{
-      data: %{
-        user: %{
-          id: user.id,
-          email: user.email,
-          name: user.name
-        }
-      }
-    }
+    %{id: user.id, name: user.name}
   end
 end
