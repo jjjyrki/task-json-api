@@ -8,7 +8,7 @@ defmodule TaskApi.Accounts.User do
   alias TaskApi.AuthToken
 
   schema "users" do
-    has_many :auth_tokens, TaskApi.AuthToken
+    has_many :auth_tokens, AuthToken
     field :name, :string
     field :email, :string
     field :password, :string, virtual: true
@@ -21,7 +21,8 @@ defmodule TaskApi.Accounts.User do
       {:ok, user} ->
         token = Authenticator.generate_token(user)
         Repo.insert(Ecto.build_assoc(user, :auth_tokens, %{token: token}))
-      err -> err
+      err -> 
+        err
     end
   end
   
@@ -41,13 +42,13 @@ defmodule TaskApi.Accounts.User do
     user
     |> cast(attrs, [:email, :password, :name])
     |> validate_required([:email, :password, :name])
-    |> validate_format(:email, ~r/@/)
+    |> validate_format(:email, ~r/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}/)
     |> unique_constraint(:email)
     |> put_password_hash
   end
 
   defp put_password_hash(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do
-    change(changeset, password: Bcrypt.hash_pwd_salt(password))
+    change(changeset, password_hash: Bcrypt.hash_pwd_salt(password))
   end
 
   defp put_password_hash(changeset), do: changeset

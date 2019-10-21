@@ -12,10 +12,10 @@ defmodule TaskApi.Services.Authenticator do
   end
 
   def verify_token(token) do
-      case Phoenix.Token.verify(@secret, @seed, token, max_age: 86400) do
-      {:ok, id} -> {:ok, token}
-      error -> error
-      end
+    case Phoenix.Token.verify(@secret, @seed, token, max_age: 86400) do
+    {:ok, id} -> {:ok, token}
+    error -> error
+    end
   end
 
   def get_auth_token(conn) do
@@ -31,7 +31,7 @@ defmodule TaskApi.Services.Authenticator do
        _ -> {:error, :missing_auth_header}
     end
   end
-  
+
   defp get_token_from_header(auth_header) do
     {:ok, reg} = Regex.compile("Bearer\:?\s+(.*)$", "i")
     case Regex.run(reg, auth_header) do

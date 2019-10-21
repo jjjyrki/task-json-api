@@ -17,7 +17,7 @@ defmodule TaskApiWeb.Router do
 
   scope "/api/v1", TaskApiWeb do
     pipe_through [:api, :authenticate]
-    resources "/users", UserController, only: [:index, :new, :show, :delete]
+    resources "/users", UserController, except: [:new, :edit]
   end
 
 end

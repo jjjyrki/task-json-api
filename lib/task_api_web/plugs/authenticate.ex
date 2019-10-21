@@ -16,7 +16,6 @@ defmodule TaskApiWeb.Plugs.Authenticate do
       end
     end
     defp authorized(conn, user) do
-      # If you want, add new values to `conn`
       conn 
       |> assign(:signed_in, true)
       |> assign(:signed_user, user)
