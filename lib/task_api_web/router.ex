@@ -9,6 +9,11 @@ defmodule TaskApiWeb.Router do
     plug TaskApiWeb.Plugs.Authenticate
   end
 
+  scope "/api/v1/", TaskApiWeb do
+    pipe_through :api
+    post "/sign_up", UserController, :create
+  end
+
   scope "/api/v1/sessions", TaskApiWeb do
     pipe_through :api
     post "/sign_in", SessionsController, :create
