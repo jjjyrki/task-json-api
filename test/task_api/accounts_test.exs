@@ -6,9 +6,19 @@ defmodule TaskApi.AccountsTest do
   describe "users" do
     alias TaskApi.Accounts.User
 
-    @valid_attrs %{}
+    @valid_attrs %{
+      email: "valid@email.foo",
+      name: "valid name",
+      password: "valid password"
+    }
+
     @update_attrs %{}
-    @invalid_attrs %{}
+    
+    @invalid_attrs %{
+      email: "invalid email format",
+      name: nil,
+      password: nil
+    }
 
     def user_fixture(attrs \\ %{}) do
       {:ok, user} =
@@ -21,12 +31,18 @@ defmodule TaskApi.AccountsTest do
 
     test "list_users/0 returns all users" do
       user = user_fixture()
-      assert Accounts.list_users() == [user]
+      users = Accounts.list_users()
+
+      for u <- users do
+        assert u.name == "valid name"
+        assert u.email == "valid@email.foo"
+      end
     end
 
     test "get_user!/1 returns the user with given id" do
-      user = user_fixture()
-      assert Accounts.get_user!(user.id) == user
+      user = Accounts.get_user!(user_fixture().id)
+      assert user.name == "valid name"
+      assert user.email == "valid@email.foo"
     end
 
     test "create_user/1 with valid data creates a user" do
@@ -43,9 +59,11 @@ defmodule TaskApi.AccountsTest do
     end
 
     test "update_user/2 with invalid data returns error changeset" do
-      user = user_fixture()
-      assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, @invalid_attrs)
-      assert user == Accounts.get_user!(user.id)
+      update_user = user_fixture()
+      assert {:error, %Ecto.Changeset{}} = Accounts.update_user(update_user, @invalid_attrs)
+      user = Accounts.get_user!(update_user.id)
+      assert user.name == "valid name"
+      assert user.email == "valid@email.foo"
     end
 
     test "delete_user/1 deletes the user" do
