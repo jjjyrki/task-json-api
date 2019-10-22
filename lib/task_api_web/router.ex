@@ -3,35 +3,21 @@ defmodule TaskApiWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
-    plug :fetch_session
   end
 
-  pipeline :api_auth do
-    plug :ensure_authenticated
+  pipeline :authenticate do
+    plug TaskApiWeb.Plugs.Authenticate
   end
 
-  scope "/api", TaskApiWeb do
+  scope "/api/v1/sessions", TaskApiWeb do
     pipe_through :api
-    post "/users/sign_in", UserController, :sign_in
+    post "/sign_in", SessionsController, :create
+    delete "/sign_out", SessionsController, :delete
   end
 
-  scope "/api", TaskApiWeb do
-    pipe_through [:api, :api_auth]
+  scope "/api/v1", TaskApiWeb do
+    pipe_through [:api, :authenticate]
     resources "/users", UserController, except: [:new, :edit]
-  end
-
-  defp ensure_authenticated(conn, _opts) do
-    current_user_id = get_session(conn, :current_user_id)
-
-    if current_user_id do
-      conn
-    else
-      conn
-      |> put_status(:unauthorized)
-      |> put_view(TaskApiWeb.ErrorView)
-      |> render("401.json", message: "Unauthenticated user")
-      |> halt()
-    end
   end
 
 end

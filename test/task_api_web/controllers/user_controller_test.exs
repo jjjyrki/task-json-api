@@ -1,18 +1,24 @@
 defmodule TaskApiWeb.UserControllerTest do
   use TaskApiWeb.ConnCase
 
-  alias TaskApi.Auth
-  alias TaskApi.Auth.User
-  alias Plug.Test
+  alias TaskApi.Repo
+  alias TaskApi.Accounts
+  alias TaskApi.Accounts.User
+
+  @current_user_attrs %{
+    email: "current@user.fi",
+    name: "some current user name",
+    password: "some current user password"
+  }
 
   @create_attrs %{
-    email: "some email",
+    email: "some@email.foo",
     name: "some name",
     password: "some password"
   }
 
   @update_attrs %{
-    email: "some updated email",
+    email: "some_updated@email.fi",
     name: "some updated name",
     password: "some updated password"
   }
@@ -23,25 +29,26 @@ defmodule TaskApiWeb.UserControllerTest do
     password: nil
   }
 
-  @current_user_attrs %{
-    email: "some current user email",
-    name: "some current user name",
-    password: "some current user password"
-  }
-
   def fixture(:user) do
-    {:ok, user} = Auth.create_user(@create_attrs)
+    {:ok, user} = Accounts.create_user(@create_attrs)
     user
   end
 
   def fixture(:current_user) do
-    {:ok, current_user} = Auth.create_user(@current_user_attrs)
+    {:ok, current_user} = Accounts.create_user(@current_user_attrs)
     current_user
   end
 
   setup %{conn: conn} do
-    {:ok, conn: conn, current_user: current_user} = setup_current_user(conn)
+    {:ok, conn, current_user} = setup_current_user(conn)
     {:ok, conn: put_req_header(conn, "accept", "application/json"), current_user: current_user}
+  end
+
+  def add_authentication(conn, current_user) do
+    {:ok, token} = User.sign_in(current_user.email, current_user.password)
+    
+    conn
+    |> put_req_header("authorization", "Bearer " <> token.token) 
   end
 
   describe "index" do
@@ -49,9 +56,10 @@ defmodule TaskApiWeb.UserControllerTest do
       conn = get(conn, Routes.user_path(conn, :index))
       assert json_response(conn, 200)["data"] == [
         %{
-          "id" => current_user.id,
-          "email" => current_user.email,
-          "name" => current_user.name
+          "user" => %{
+            "email" => current_user.email,
+            "name" => current_user.name
+          }
         }
       ]
     end
@@ -60,15 +68,23 @@ defmodule TaskApiWeb.UserControllerTest do
   describe "create user" do
     test "renders user when data is valid", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :create), user: @create_attrs)
-      assert %{"id" => id} = json_response(conn, 201)["data"]
-
-      conn = get(conn, Routes.user_path(conn, :show, id))
+      assert %{
+        "user" => %{
+          "email" => "some@email.foo",
+          "name" => "some name"
+        }
+      } = json_response(conn, 201)["data"]
+      
+      user = Repo.get_by(User, email: @create_attrs.email)
+    
+      conn = get(conn, Routes.user_path(conn, :show, user.id))
 
       assert %{
-               "id" => id,
-               "email" => "some email",
-               "name" => "some name"
-             } = json_response(conn, 200)["data"]
+        "user" => %{
+            "email" => "some@email.foo",
+            "name" => "some name"
+          }
+        } = json_response(conn, 200)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -82,15 +98,21 @@ defmodule TaskApiWeb.UserControllerTest do
 
     test "renders user when data is valid", %{conn: conn, user: %User{id: id} = user} do
       conn = put(conn, Routes.user_path(conn, :update, user), user: @update_attrs)
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+      assert %{
+        "user" => %{
+          "email" => "some_updated@email.fi",
+          "name" => "some updated name"
+        }
+      } = json_response(conn, 200)["data"]
 
       conn = get(conn, Routes.user_path(conn, :show, id))
 
       assert %{
-               "id" => id,
-               "email" => "some updated email",
-               "name" => "some updated name"
-             } = json_response(conn, 200)["data"]
+        "user" => %{
+          "email" => "some_updated@email.fi",
+          "name" => "some updated name"
+        }
+       } = json_response(conn, 200)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do
@@ -114,29 +136,13 @@ defmodule TaskApiWeb.UserControllerTest do
 
   describe "sign_in user" do
     test "renders user when user credentials are good", %{conn: conn, current_user: current_user} do
-      conn =
-        post(
-          conn,
-          Routes.user_path(conn, :sign_in, %{
-            email: current_user.email,
-            password: @current_user_attrs.password
-          })
-        )
-
-      assert json_response(conn, 200)["data"] == %{
-                "user" => %{
-                  "id" => current_user.id,
-                  "email" => current_user.email,
-                  "name" => current_user.name
-                }
-              }
-    end
-
-    test "renders errors when user credentials are bad", %{conn: conn} do
-      conn =
-        post(conn, Routes.user_path(conn, :sign_in, %{email: "non-existent email", password: ""}))
-
-      assert json_response(conn, 401)["errors"] == %{"detail" => "Wrong email or password"}
+      conn = get(conn, Routes.user_path(conn, :show, current_user.id))
+      assert %{
+        "user" => %{
+          "email" => "current@user.fi",
+          "name" => "some current user name"
+        }
+      } = json_response(conn, 200)["data"]
     end
   end
 
@@ -147,10 +153,10 @@ defmodule TaskApiWeb.UserControllerTest do
 
   defp setup_current_user(conn) do
     current_user = fixture(:current_user)
-
-    {:ok,
-      conn: Test.init_test_session(conn, current_user_id: current_user.id),
-      current_user: current_user}
+    {:ok, token} = User.sign_in(current_user.email, current_user.password)
+    conn = conn
+    |> put_req_header("authorization", "Bearer " <> token.token) 
+    {:ok, conn, current_user}
   end
 
 end
