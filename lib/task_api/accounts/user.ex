@@ -6,6 +6,7 @@ defmodule TaskApi.Accounts.User do
   alias TaskApi.Repo
   alias TaskApi.Accounts.User
   alias TaskApi.AuthToken
+  alias TaskApi.Tasks.Todo
 
   schema "users" do
     has_many :auth_tokens, AuthToken
@@ -13,6 +14,8 @@ defmodule TaskApi.Accounts.User do
     field :email, :string
     field :password, :string, virtual: true
     field :password_hash, :string
+    has_many :todos, Todo
+      
     timestamps()
   end
 
