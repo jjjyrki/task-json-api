@@ -40,5 +40,12 @@ defmodule TaskApiWeb.Endpoint do
     key: "_task_api_key",
     signing_salt: "K22Ty9T/"
 
+    plug Corsica,
+      origins: "http://localhost:8080",
+      allow_credentials: true,
+      allow_headers: :all,
+      allow_methods: :all,
+      log: [rejected: :error, invalid: :warn, accepted: :debug]
+
   plug TaskApiWeb.Router
 end
