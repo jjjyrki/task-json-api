@@ -12,6 +12,7 @@ defmodule TaskApiWeb.Router do
   scope "/api/v1/", TaskApiWeb do
     pipe_through :api
     post "/sign_up", UserController, :create
+    resources "/tasks/todo", TodoController
   end
 
   scope "/api/v1/sessions", TaskApiWeb do
@@ -23,7 +24,6 @@ defmodule TaskApiWeb.Router do
   scope "/api/v1", TaskApiWeb do
     pipe_through [:api, :authenticate]
     resources "/users", UserController, except: [:new, :edit]
-    resources "/tasks/todo", TodoController
   end
 
 end
