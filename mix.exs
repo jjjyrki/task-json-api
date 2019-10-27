@@ -20,7 +20,8 @@ defmodule TaskApi.MixProject do
   def application do
     [
       mod: {TaskApi.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools],
+      applications: [:edeliver]
     ]
   end
 
@@ -44,6 +45,8 @@ defmodule TaskApi.MixProject do
       {:comeonin, "~> 4.0"},
       {:bcrypt_elixir, "~> 1.0"},
       {:corsica, "~> 1.0"},
+      {:edeliver, ">= 1.6.0"},
+      {:distillery, "~> 2.0", warn_missing: false},
     ]
   end
 
