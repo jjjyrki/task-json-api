@@ -11,6 +11,11 @@ defmodule TaskApiWeb.TodoView do
   end
 
   def render("todo.json", %{todo: todo}) do
-    %{id: todo.id}
+    %{
+      id: todo.id,
+      user_id: todo.user_id,
+      title: todo.title,
+      description: todo.description,
+    }
   end
 end
