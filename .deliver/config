@@ -8,7 +8,7 @@ BUILD_AT="/tmp/edeliver/$APP/builds"
 
 PRODUCTION_HOSTS="52.59.192.161"
 PRODUCTION_USER="elixir_builder"
-DELIVER_TO="/elixir_builder/deploy"
+DELIVER_TO="elixir_builder/deploy"
 
 USING_DISTILLERY="true"
 
