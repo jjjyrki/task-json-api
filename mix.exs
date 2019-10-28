@@ -45,8 +45,8 @@ defmodule TaskApi.MixProject do
       {:comeonin, "~> 4.0"},
       {:bcrypt_elixir, "~> 1.0"},
       {:corsica, "~> 1.0"},
-      {:edeliver, ">= 1.6.0"},
-      {:distillery, "~> 2.0", warn_missing: false},
+      {:edeliver, ">= 1.7.0"},
+      {:distillery, "~> 2.1", warn_missing: false},
     ]
   end
 
