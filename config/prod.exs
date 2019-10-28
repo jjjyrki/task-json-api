@@ -10,7 +10,7 @@ use Mix.Config
 # which you should run after static files are built and
 # before starting your production server.
 config :task_api, TaskApiWeb.Endpoint,
-  http: [port: 4000],
+  http: [port: 8888],
   url: [host: "example.com", port: 80]
   #cache_static_manifest: "priv/static/cache_manifest.json"
 
