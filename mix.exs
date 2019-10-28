@@ -20,8 +20,7 @@ defmodule TaskApi.MixProject do
   def application do
     [
       mod: {TaskApi.Application, []},
-      extra_applications: [:logger, :runtime_tools],
-      applications: [:edeliver]
+      extra_applications: [:logger, :runtime_tools, :edeliver]
     ]
   end
 
